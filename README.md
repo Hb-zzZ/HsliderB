@@ -1,2 +1,3 @@
-# ssSliding
-模仿并前行
+# HsliderB
+
+·用于轮播图
