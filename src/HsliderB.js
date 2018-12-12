@@ -12,12 +12,13 @@ export default class HsliderB {
     this.sliderWrap = null
     this.currentIndex = Math.floor(this.config.startIndex / this.config.sliderPage)
     this.detail = { sliderWrapWorH: null, childrenDomsLen: null }
-
+    
     const Events = ['resizeHandler']
     Events.forEach((event) => {
       this[event] = this[event].bind(this)
     })
-
+    HsliderB.utilResponsivePage.call(this)
+    
     this.init()
   }
 
@@ -29,6 +30,7 @@ export default class HsliderB {
       sliderPage: 1,
       startIndex: 0,
       direction: 'row',
+      responsives: [],
       onInit: () => {},
       onChange: () => {}
     }
@@ -41,6 +43,22 @@ export default class HsliderB {
     return settings
   }
 
+  static utilResponsivePage(){
+    const responsives = this.config.responsives
+    let responsiveMin = { view: null, sliderPage: null }
+
+    if (responsives.length > 0) {
+      responsives.forEach((responsive) => {
+        if (responsiveMin.view) {
+          responsiveMin.view > responsive.view && (responsiveMin = responsive)
+        } else {
+          responsive.view > this.selectorWorH && (responsiveMin = responsive)
+        }
+      })
+    }
+    responsiveMin.view && (this.config.sliderPage = responsiveMin.sliderPage)
+  }
+  
   static utilTranslate3d(nextIndex) {
     let actionIndex = null
     if (nextIndex === 'next') {
@@ -77,8 +95,11 @@ export default class HsliderB {
   }
 
   resizeHandler() {
-    this.selectorWorH = this.config.direction === 'row' ? this.selector.offsetWidth : this.selector.offsetHeight
-    const sliderWrapWorH = (this.selectorWorH / this.config.sliderPage) * this.detail.childrenDomsLen
+    const selectorWorH = (this.selectorWorH = this.config.direction === 'row' ? this.selector.offsetWidth : this.selector.offsetHeight)
+    
+    HsliderB.utilResponsivePage.call(this)
+
+    const sliderWrapWorH = (selectorWorH / this.config.sliderPage) * this.detail.childrenDomsLen
     this.detail.sliderWrapWorH = sliderWrapWorH
     this.config.direction === 'row' ? (this.sliderWrap.style.width = sliderWrapWorH + 'px') : (this.sliderWrap.style.height = sliderWrapWorH + 'px')
     this.goToSilder(this.currentIndex)

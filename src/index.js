@@ -24,7 +24,8 @@ let test_hsliderB = new HsliderB({
   startIndex: 2,
   // direction: 'column',
   direction: 'row',
-  sliderPage: 2.6
+  sliderPage: 2.6,
+  responsives: [{ view: 800, sliderPage: 1.5 }, { view: 400, sliderPage: 1 }, { view: 1000, sliderPage: 2 }, { view: 1200, sliderPage: 2.4 }]
 })
 
 document.querySelector('.tset-prev').addEventListener('click', function() {
