@@ -2,23 +2,25 @@ export default class HsliderB {
   constructor(options) {
     this.config = HsliderB.mergeUserConfig(options)
 
-    this.selector =
-      String(this.config.selector) === this.config.selector
-        ? document.querySelector(this.config.selector)
-        : this.config.selector
+    this.selector = String(this.config.selector) === this.config.selector ? document.querySelector(this.config.selector) : this.config.selector
 
     if (this.selector === null) {
       throw new Error('Your selector was error!!!')
     }
 
-    this.selectorWorH =
-      this.config.direction === 'row' ? this.selector.offsetWidth : this.selector.offsetHeight
+    this.selectorWorH = this.config.direction === 'row' ? this.selector.offsetWidth : this.selector.offsetHeight
     this.sliderWrap = null
     this.currentIndex = Math.floor(this.config.startIndex / this.config.sliderPage)
-    this.detail = { sliderWrapWorH: null }
+    this.detail = { sliderWrapWorH: null, childrenDomsLen: null }
+
+    const Events = ['resizeHandler']
+    Events.forEach((event) => {
+      this[event] = this[event].bind(this)
+    })
 
     this.init()
   }
+
   static mergeUserConfig(options) {
     let settings = {
       selector: '.HsliderB',
@@ -27,7 +29,6 @@ export default class HsliderB {
       sliderPage: 1,
       startIndex: 0,
       direction: 'row',
-      loop: false,
       onInit: () => {},
       onChange: () => {}
     }
@@ -51,45 +52,60 @@ export default class HsliderB {
     }
 
     const singleWorH = this.selectorWorH / this.config.sliderPage
-    const offset = singleWorH * actionIndex
-    if (offset < 0 || offset > this.detail.sliderWrapWorH - singleWorH * this.config.sliderPage) {
+    let offset = singleWorH * actionIndex
+    const maxOffset = this.detail.sliderWrapWorH - singleWorH * this.config.sliderPage
+    const surplusOffset = Math.abs(maxOffset - offset)
+
+    if (maxOffset > surplusOffset && surplusOffset < singleWorH) {
+      offset = offset - surplusOffset
+    } else if (offset < 0 || offset > maxOffset) {
       return null
     }
 
     this.currentIndex = actionIndex
-    const translate3d =
-      this.config.direction === 'row'
-        ? `translate3d(-${offset}px,0px,0px)`
-        : `translate3d(0px,-${offset}px,0px)`
+
+    const translate3d = this.config.direction === 'row' ? `translate3d(-${offset}px,0px,0px)` : `translate3d(0px,-${offset}px,0px)`
     return translate3d
+  }
+
+  static addEvents() {
+    window.addEventListener('resize', this.resizeHandler)
+  }
+
+  static removeEvents() {
+    window.removeEventListener('resize', this.resizeHandler)
+  }
+
+  resizeHandler() {
+    this.selectorWorH = this.config.direction === 'row' ? this.selector.offsetWidth : this.selector.offsetHeight
+    const sliderWrapWorH = (this.selectorWorH / this.config.sliderPage) * this.detail.childrenDomsLen
+    this.detail.sliderWrapWorH = sliderWrapWorH
+    this.config.direction === 'row' ? (this.sliderWrap.style.width = sliderWrapWorH + 'px') : (this.sliderWrap.style.height = sliderWrapWorH + 'px')
+    this.goToSilder(this.currentIndex)
   }
 
   init() {
     this.buildFrame()
     this.goToSilder(this.currentIndex)
+    HsliderB.addEvents.call(this)
   }
 
   buildFrame() {
     const sliderWrap = document.createElement('div')
     const childrenDoms = this.selector.childNodes
-    const sliderWrapWorH = (this.selectorWorH / this.config.sliderPage) * childrenDoms.length
+    this.detail.childrenDomsLen = childrenDoms.length
+    const sliderWrapWorH = (this.selectorWorH / this.config.sliderPage) * this.detail.childrenDomsLen
 
     sliderWrap.classList.add('HsliderB-wrap')
     sliderWrap.style.cssText = `width: 100%;height: 100%;${
-      this.config.direction === 'row'
-        ? 'width: ' + (sliderWrapWorH + 'px')
-        : 'height: ' + (sliderWrapWorH + 'px')
-    };display: flex;flex-direction: ${
-      this.config.direction
-    };transform: translate3d(0px,0px,0px);transition: all ${this.config.duration}ms ${
+      this.config.direction === 'row' ? 'width: ' + (sliderWrapWorH + 'px') : 'height: ' + (sliderWrapWorH + 'px')
+    };display: flex;flex-direction: ${this.config.direction};transform: translate3d(0px,0px,0px);transition: all ${this.config.duration}ms ${
       this.config.easing
     }`
 
-    for (let i = 0, len = childrenDoms.length, perWorH = 100 / len; i < len; i++) {
+    for (let i = 0, len = this.detail.childrenDomsLen, perWorH = 100 / len; i < len; i++) {
       const childrenDom = childrenDoms[i].cloneNode(true)
-      childrenDom.style.cssText = `width: 100%;height: 100%;${
-        this.config.direction === 'row' ? 'width: ' + (perWorH + '%') : 'height: ' + (perWorH + '%')
-      };`
+      childrenDom.style.cssText = `width: 100%;height: 100%;${this.config.direction === 'row' ? 'width: ' + (perWorH + '%') : 'height: ' + (perWorH + '%')};`
       sliderWrap.appendChild(childrenDom)
     }
 
@@ -106,7 +122,6 @@ export default class HsliderB {
       return null
     }
     this.sliderWrap.style.transform = translate3d
-    console.log(this.currentIndex)
     if (callback) {
       callback.call(this, this)
     }

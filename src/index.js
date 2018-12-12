@@ -6,7 +6,7 @@ let hsliderB = new HsliderB({
   startIndex: 2,
   direction: 'column',
   // direction: 'row',
-  sliderPage: 1.5
+  sliderPage: 1.6
 })
 
 document.querySelector('.prev').addEventListener('click', function() {
@@ -24,7 +24,7 @@ let test_hsliderB = new HsliderB({
   startIndex: 2,
   // direction: 'column',
   direction: 'row',
-  sliderPage: 1.5
+  sliderPage: 2.6
 })
 
 document.querySelector('.tset-prev').addEventListener('click', function() {
