@@ -11,8 +11,11 @@ export default class HsliderB {
       throw new Error('Your selector was error!!!')
     }
 
-    this.selectorWidth = this.selector.offsetWidth
-    this.childrenDoms = this.selector.childNodes
+    this.selectorWorH =
+      this.config.direction === 'row' ? this.selector.offsetWidth : this.selector.offsetHeight
+    this.sliderWrap = null
+    this.currentIndex = Math.floor(this.config.startIndex / this.config.sliderPage)
+    this.detail = { sliderWrapWorH: null }
 
     this.init()
   }
@@ -20,7 +23,7 @@ export default class HsliderB {
     let settings = {
       selector: '.HsliderB',
       duration: 200,
-      easing: 'ease-out',
+      easing: 'cubic-bezier(.39,.575,.565,1)',
       sliderPage: 1,
       startIndex: 0,
       direction: 'row',
@@ -37,30 +40,75 @@ export default class HsliderB {
     return settings
   }
 
+  static utilTranslate3d(nextIndex) {
+    let actionIndex = null
+    if (nextIndex === 'next') {
+      actionIndex = this.currentIndex + 1
+    } else if (nextIndex === 'prev') {
+      actionIndex = this.currentIndex - 1
+    } else {
+      actionIndex = Number(nextIndex)
+    }
+
+    const singleWorH = this.selectorWorH / this.config.sliderPage
+    const offset = singleWorH * actionIndex
+    if (offset < 0 || offset > this.detail.sliderWrapWorH - singleWorH * this.config.sliderPage) {
+      return null
+    }
+
+    this.currentIndex = actionIndex
+    const translate3d =
+      this.config.direction === 'row'
+        ? `translate3d(-${offset}px,0px,0px)`
+        : `translate3d(0px,-${offset}px,0px)`
+    return translate3d
+  }
+
   init() {
     this.buildFrame()
+    this.goToSilder(this.currentIndex)
   }
 
   buildFrame() {
     const sliderWrap = document.createElement('div')
-    const childrenDoms = this.childrenDoms
-    const sliderPage = this.config.sliderPage
-    const direction = this.config.direction
-    const sliderWrapWidth =
-      (this.selectorWidth / sliderPage) * childrenDoms.length
+    const childrenDoms = this.selector.childNodes
+    const sliderWrapWorH = (this.selectorWorH / this.config.sliderPage) * childrenDoms.length
 
     sliderWrap.classList.add('HsliderB-wrap')
-    sliderWrap.style.cssText = `width: ${sliderWrapWidth +
-      'px'};display: flex;flex-direction: ${direction}`
+    sliderWrap.style.cssText = `width: 100%;height: 100%;${
+      this.config.direction === 'row'
+        ? 'width: ' + (sliderWrapWorH + 'px')
+        : 'height: ' + (sliderWrapWorH + 'px')
+    };display: flex;flex-direction: ${
+      this.config.direction
+    };transform: translate3d(0px,0px,0px);transition: all ${this.config.duration}ms ${
+      this.config.easing
+    }`
 
-    for (let i = 0, len = childrenDoms.length; i < len; i++) {
+    for (let i = 0, len = childrenDoms.length, perWorH = 100 / len; i < len; i++) {
       const childrenDom = childrenDoms[i].cloneNode(true)
-      childrenDom.style.cssText = `width: ${100 / len + '%'};`
+      childrenDom.style.cssText = `width: 100%;height: 100%;${
+        this.config.direction === 'row' ? 'width: ' + (perWorH + '%') : 'height: ' + (perWorH + '%')
+      };`
       sliderWrap.appendChild(childrenDom)
     }
 
     this.selector.innerHTML = ''
     this.selector.style.cssText = 'overflow: hidden;'
     this.selector.appendChild(sliderWrap)
+    this.sliderWrap = sliderWrap
+    this.detail.sliderWrapWorH = sliderWrapWorH
+  }
+
+  goToSilder(index, callback) {
+    const translate3d = HsliderB.utilTranslate3d.call(this, index)
+    if (!translate3d) {
+      return null
+    }
+    this.sliderWrap.style.transform = translate3d
+    console.log(this.currentIndex)
+    if (callback) {
+      callback.call(this, this)
+    }
   }
 }
