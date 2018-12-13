@@ -6,7 +6,8 @@ let hsliderB = new HsliderB({
   startIndex: 2,
   direction: 'column',
   // direction: 'row',
-  sliderPage: 1.6
+  sliderPage: 1.6,
+  responsives: [{ view: 100, sliderPage: 1 }]
 })
 
 document.querySelector('.prev').addEventListener('click', function() {

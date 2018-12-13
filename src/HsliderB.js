@@ -11,7 +11,7 @@ export default class HsliderB {
     this.selectorWorH = this.config.direction === 'row' ? this.selector.offsetWidth : this.selector.offsetHeight
     this.sliderWrap = null
     this.currentIndex = Math.floor(this.config.startIndex / this.config.sliderPage)
-    this.detail = { sliderWrapWorH: null, childrenDomsLen: null }
+    this.detail = { sliderWrapWorH: null, childrenDomsLen: null, normalPage: this.config.sliderPage }
     
     const Events = ['resizeHandler']
     Events.forEach((event) => {
@@ -56,7 +56,7 @@ export default class HsliderB {
         }
       })
     }
-    responsiveMin.view && (this.config.sliderPage = responsiveMin.sliderPage)
+    this.config.sliderPage = responsiveMin.view ? responsiveMin.sliderPage : this.detail.normalPage
   }
   
   static utilTranslate3d(nextIndex) {
