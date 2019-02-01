@@ -1,3 +1,2 @@
-# HsliderB
-
-·用于轮播图
+# my-scaffold
+A scaffold for new project

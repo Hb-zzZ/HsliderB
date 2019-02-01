@@ -1,6 +1,5 @@
 /* eslint-disable */
 const path = require('path')
-const DashboardPlugin = require('webpack-dashboard/plugin')
 const CleanWebpackPlugin = require('clean-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 
@@ -75,7 +74,6 @@ module.exports = {
     }
   },
   plugins: [
-    new DashboardPlugin({ color: '#888' }),
     new HtmlWebpackPlugin({
       filename: 'index.html', // 配置输出文件名和路径
       template: path.resolve(__dirname, '../public/index.html'), // 配置要被编译的html文件

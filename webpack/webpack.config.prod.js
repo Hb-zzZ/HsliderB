@@ -8,6 +8,7 @@ const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin')
 
 module.exports = merge(webpackBaseConfig, {
   mode: 'development',
+  devtool: false,
   module: {
     rules: [
       {
@@ -57,6 +58,7 @@ module.exports = merge(webpackBaseConfig, {
         compress: {
           unused: true,
           warnings: false,
+          drop_console: true,
           drop_debugger: true
         },
         output: {

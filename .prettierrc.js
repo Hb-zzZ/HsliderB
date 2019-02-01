@@ -1,7 +1,6 @@
 module.exports = {
   // tab缩进大小,默认为2
   tabWidth: 2,
-  printWidth: 100,
   // 使用tab缩进，默认false
   useTabs: false,
   // 使用分号, 默认true

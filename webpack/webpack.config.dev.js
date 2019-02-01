@@ -43,7 +43,7 @@ module.exports = merge(webpackBaseConfig, {
   },
   plugins: [new webpack.HotModuleReplacementPlugin()],
   devServer: {
-    port: 8000,
+    port: 8080,
     open: false,
     inline: true,
     compress: true,
